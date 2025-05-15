@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirmation d'Inscription à JuneTech</title>
+    <style>
+      body {
+        font-family: 'Helvetica', 'Arial', sans-serif;
+        background-color: #f0f2f5;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #1a3c6e, #2a5a9e);
+        padding: 30px;
+        text-align: center;
+      }
+      .header img {
+        max-width: 160px;
+        animation: fadeIn 1s ease-in;
+      }
+      .content {
+        padding: 40px;
+      }
+      h1 {
+        color: #1a3c6e;
+        font-size: 26px;
+        margin: 0 0 20px;
+        animation: slideIn 0.8s ease-out;
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.7;
+        margin: 0 0 15px;
+      }
+      .footer {
+        background-color: #f0f2f5;
+        padding: 20px;
+        text-align: center;
+        font-size: 14px;
+        color: #666;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateY(-20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      @media only screen and (max-width: 600px) {
+        .container {
+          margin: 10px;
+        }
+        .content {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img src="https://via.placeholder.com/160x50?text=JuneTech+Logo" alt="JuneTech Logo" />
+      </div>
+      <div class="content">
+        <h1>Merci pour votre inscription, {{ prenom }} !</h1>
+        <p>
+          Nous avons bien reçu votre inscription pour <strong>JuneTech 5ème Édition</strong>, qui se tiendra du <strong>1er au 5 juin 2025</strong>.
+        </p>
+        <p>Votre demande est en cours de validation par notre équipe. Vous recevrez un email de confirmation avec votre badge officiel une fois votre participation approuvée.</p>
+        <p>
+          Pour toute question, contactez-nous à <a href="mailto:contact@junetech.com" style="color: #1a3c6e;">contact@junetech.com</a>.
+        </p>
+        <p>Nous avons hâte de vous accueillir !</p>
+        <p>L'équipe JuneTech</p>
+      </div>
+      <div class="footer">
+        <p>JuneTech 5ème Édition | 1er-5 juin 2025 | © 2025 JuneTech</p>
+      </div>
+    </div>
+  </body>
+</html># Fichier : templates/email/validation_email.html<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Votre Badge pour JuneTech</title>
+    <style>
+      body {
+        font-family: 'Helvetica', 'Arial', sans-serif;
+        background-color: #f0f2f5;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background: linear-gradient(135deg, #1a3c6e, #2a5a9e);
+        padding: 30px;
+        text-align: center;
+      }
+      .header img {
+        max-width: 160px;
+        animation: fadeIn 1s ease-in;
+      }
+      .content {
+        padding: 40px;
+      }
+      h1 {
+        color: #1a3c6e;
+        font-size: 26px;
+        margin: 0 0 20px;
+        animation: slideIn 0.8s ease-out;
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.7;
+        margin: 0 0 15px;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #1a3c6e, #2a5a9e);
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        margin: 20px 0;
+        animation: pulse 2s infinite;
+      }
+      .footer {
+        background-color: #f0f2f5;
+        padding: 20px;
+        text-align: center;
+        font-size: 14px;
+        color: #666;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateY(-20px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      @media only screen and (max-width: 600px) {
+        .container {
+          margin: 10px;
+        }
+        .content {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img src="https://via.placeholder.com/160x50?text=JuneTech+Logo" alt="JuneTech Logo" />
+      </div>
+      <div class="content">
+        <h1>Félicitations, {{ prenom }} ! Vous êtes sélectionné(e) !</h1>
+        <p>
+          Nous sommes ravis de vous confirmer votre participation à <strong>JuneTech 5ème Édition</strong>, qui se tiendra du <strong>1er au 5 juin 2025</strong>.
+        </p>
+        <p>Votre badge officiel est joint à cet email. Vous pouvez :</p>
+        <ul>
+          <li>Imprimer votre badge et l'apporter à l'événement pour un accès rapide.</li>
+          <li>Ou le présenter sur votre téléphone. Si vous préférez, nous pouvons l'imprimer sur place.</li>
+        </ul>
+        <p>Pour télécharger votre badge, cliquez sur le bouton ci-dessous :</p>
+        <a href="{{ badge_url }}" class="button">Télécharger votre Badge</a>
+        <p>
+          Pour toute question, contactez-nous à <a href="mailto:contact@junetech.com" style="color: #1a3c6e;">contact@junetech.com</a>.
+        </p>
+        <p>Nous avons hâte de vous accueillir à JuneTech !</p>
+        <p>L'équipe JuneTech</p>
+      </div>
+      <div class="footer">
+        <p>JuneTech 5ème Édition | 1er-5 juin 2025 | © 2025 JuneTech</p>
+      </div>
+    </div>
+  </body>
+</html>

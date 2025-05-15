@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Votre QR Code pour JuneTech</title>
+    <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+        color: #333;
+      }
+      .container {
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+      .header {
+        background-color: #1a3c6e;
+        padding: 20px;
+        text-align: center;
+      }
+      .header img {
+        max-width: 150px;
+      }
+      .content {
+        padding: 30px;
+      }
+      h1 {
+        color: #1a3c6e;
+        font-size: 24px;
+        margin: 0 0 20px;
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0 0 15px;
+      }
+      .button {
+        display: inline-block;
+        padding: 12px 24px;
+        background-color: #1a3c6e;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        margin: 20px 0;
+      }
+      .button:hover {
+        background-color: #15325b;
+      }
+      .footer {
+        background-color: #f4f4f4;
+        padding: 20px;
+        text-align: center;
+        font-size: 14px;
+        color: #777;
+      }
+      @media only screen and (max-width: 600px) {
+        .container {
+          margin: 10px;
+        }
+        .content {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img src="https://via.placeholder.com/150x50?text=JuneTech+Logo" alt="JuneTech Logo" />
+      </div>
+      <div class="content">
+        <h1>Bienvenue à JuneTech 5ème Édition, {{ prenom }} !</h1>
+        <p>
+          Merci pour votre inscription à <strong>JuneTech 5ème Édition</strong>, l'événement technologique incontournable qui se tiendra du <strong>1er au 5 juin 2025</strong>.
+        </p>
+        <p>Votre QR code personnel est joint à cet email. Vous pouvez :</p>
+        <ul>
+          <li>Le présenter sur votre téléphone lors de l'événement.</li>
+          <li>L'imprimer pour l'inclure sur votre badge.</li>
+        </ul>
+        <p>Pour télécharger votre QR code, cliquez sur le bouton ci-dessous :</p>
+        <a href="{{ qr_code_url }}" class="button">Télécharger votre QR Code</a>
+        <p>
+          Si vous avez des questions, contactez-nous à <a href="mailto:contact@junetech.com">contact@junetech.com</a>.
+        </p>
+        <p>Nous avons hâte de vous accueillir !</p>
+        <p>L'équipe JuneTech</p>
+      </div>
+      <div class="footer">
+        <p>JuneTech 5ème Édition | 1er-5 juin 2025 | &copy; 2025 JuneTech</p>
+      </div>
+    </div>
+  </body>
+</html>
