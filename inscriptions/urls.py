@@ -1,22 +1,24 @@
 from django.urls import path
-from .views import (
-    ParticipantCreateView,
-    ParticipantDetailView,
-    ScanCreateView,
-    ScanSummaryView,
-    generate_badge,
-)
+from . import views
 
 urlpatterns = [
+    path("", views.home, name="home"),
     path(
-        "api/participants/", ParticipantCreateView.as_view(), name="participant-create"
+        "api/registrations/",
+        views.RegistrationCreateView.as_view(),
+        name="registration-create",
     ),
     path(
-        "api/participants/<uuid:id>/",
-        ParticipantDetailView.as_view(),
-        name="participant-detail",
+        "api/registrations/<str:registration_number>/",
+        views.RegistrationDetailView.as_view(),
+        name="registration-detail",
     ),
-    path("api/scans/", ScanCreateView.as_view(), name="scan-create"),
-    path("api/scans/summary/", ScanSummaryView.as_view(), name="scan-summary"),
-    path("api/participants/<uuid:id>/badge/", generate_badge, name="participant-badge"),
+    path("api/scans/", views.ScanCreateView.as_view(), name="scan-create"),
+    path("api/scans/<int:id>/", views.ScanDeleteView.as_view(), name="scan-delete"),
+    path("api/scan-summary/", views.ScanSummaryView.as_view(), name="scan-summary"),
+    path(
+        "api/registrations/<str:registration_number>/badge/",
+        views.generate_badge,
+        name="generate-badge",
+    ),
 ]
