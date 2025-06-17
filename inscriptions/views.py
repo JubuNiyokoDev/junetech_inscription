@@ -17,7 +17,7 @@ from datetime import datetime
 from rest_framework import status
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404, redirect
-from .utils import validate_registration
+from inscriptions.utils import validate_registration
 
 
 def registration_badge_view(request, registration_number):
