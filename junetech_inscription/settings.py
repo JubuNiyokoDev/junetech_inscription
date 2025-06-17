@@ -9,8 +9,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = "django-insecure-8k*6hip(4g3t5e7*h70z1k!#ph0)y!^_z_+&ofb=z0_t)r6!uw"
-DEBUG = os.getenv("DEBUG", "True") == "True"
-
+# DEBUG = os.getenv("DEBUG", "True") == "True"
+DEBUG = True
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = []
 CORS_ALLOWED_ORIGINS = []
