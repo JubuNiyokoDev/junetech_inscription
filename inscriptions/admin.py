@@ -13,7 +13,7 @@ from .models import (
     ImgRegistration,
     Scan,
 )
-from .views import create_badge
+from .utils import validate_registration
 
 
 @admin.register(Event)
@@ -82,88 +82,32 @@ class RegistrationVisitorsAdmin(admin.ModelAdmin):
 
     def validate_registrations(self, request, queryset):
         validated_count = 0
-        badge_path = os.path.join(settings.BASE_DIR, "static/images/badge_template.png")
-
         for registration in queryset:
-            if not registration.validation:
-                try:
-                    registration.validation = True
-                    registration.save()
-
-                    # Generate badge using centralized function
-                    badge_data = create_badge(registration, request, badge_path)
-
-                    # Ensure badges directory exists
-                    badges_dir = os.path.join(settings.MEDIA_ROOT, "badges")
-                    os.makedirs(badges_dir, exist_ok=True)
-
-                    # Save badge to media folder
-                    badge_filename = f"{registration.registration_number}_badge.png"
-                    badge_filepath = os.path.join(badges_dir, badge_filename)
-                    with open(badge_filepath, "wb") as f:
-                        f.write(badge_data)
-                    badge_url = f"/media/badges/{badge_filename}"
-                    ImgRegistration.objects.create(
-                        registration_number=registration,
-                        url_img=badge_url,
-                    )
-
-                    # Send validation email
-                    context = {
-                        "first_name": registration.first_name,
-                        "name": registration.name,
-                        "badge_url": request.build_absolute_uri(
-                            reverse(
-                                "registration-badge",
-                                args=[registration.registration_number],
-                            )
-                        ),
-                    }
-                    email_html = render_to_string(
-                        "email/validation_email.html", context
-                    )
-                    email = EmailMessage(
-                        subject="Votre Badge pour JuneTech 5ème Édition",
-                        body=email_html,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        to=[registration.email],
-                    )
-                    email.content_subtype = "html"
-                    email.attach(
-                        f"badge_{registration.first_name}_{registration.name}.png",
-                        badge_data,
-                        "image/png",
-                    )
-                    email.send()
-                    validated_count += 1
-                    self.message_user(
-                        request,
-                        f"Registration {registration} validée et email envoyé.",
-                        level=messages.SUCCESS,
-                    )
-                except FileNotFoundError as e:
-                    self.message_user(
-                        request,
-                        f"Erreur pour {registration.email} : {e}",
-                        level=messages.ERROR,
-                    )
-                except Exception as e:
-                    self.message_user(
-                        request,
-                        f"Erreur lors de la validation de {registration.email} : {e}",
-                        level=messages.ERROR,
-                    )
+            result = validate_registration(registration, request)
+            if result["success"]:
+                validated_count += 1
+                self.message_user(
+                    request,
+                    f"Inscription {registration} validée et email envoyé.",
+                    level=messages.SUCCESS,
+                )
+            else:
+                self.message_user(
+                    request,
+                    f"Erreur pour {registration.email} : {result['error']}",
+                    level=messages.ERROR,
+                )
         if validated_count > 0:
             self.message_user(
                 request,
-                f"{validated_count} registration(s) validée(s) avec succès.",
+                f"{validated_count} inscription(s) validée(s) avec succès.",
                 level=messages.SUCCESS,
             )
         else:
             self.message_user(
                 request,
-                "Aucune registration validée (déjà validées ou erreurs).",
+                "Aucune inscription validée (déjà validées ou erreurs).",
                 level=messages.WARNING,
             )
 
-    validate_registrations.short_description = "Valider les registrations sélectionnées"
+    validate_registrations.short_description = "Valider les inscriptions sélectionnées"

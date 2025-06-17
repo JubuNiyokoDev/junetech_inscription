@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics, views
 from rest_framework.response import Response
-from .models import RegistrationVisitors, Scan, Event, RegistrationType
+from .models import RegistrationVisitors, Scan, Event, RegistrationType, ImgRegistration
 from .serializers import RegistrationVisitorsSerializer, ScanSerializer
 from rest_framework.permissions import AllowAny
 import qrcode
@@ -16,91 +16,75 @@ import os
 from datetime import datetime
 from rest_framework import status
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404, redirect
+from .utils import validate_registration
+
+
+def registration_badge_view(request, registration_number):
+    img = get_object_or_404(ImgRegistration, registration_number=registration_number)
+    return redirect(img.url_img)
 
 
 def create_badge(registration, request, badge_path):
-    qr = qrcode.QRCode(version=1, box_size=15, border=5)
+    # === Données QR Code ===
     qr_data = request.build_absolute_uri(
         reverse("registration-detail", args=[registration.registration_number])
     ).rstrip("/")
-    print(f"QR code data: {qr_data}")
+    qr = qrcode.QRCode(version=1, box_size=15, border=5)
     qr.add_data(qr_data)
     qr.make(fit=True)
     qr_img = qr.make_image(fill="black", back_color="white")
 
+    # === Vérification modèle ===
     if not os.path.exists(badge_path):
-        raise FileNotFoundError(f"Badge template not found at {badge_path}")
+        raise FileNotFoundError(f"Modèle introuvable : {badge_path}")
 
     badge_img = Image.open(badge_path).convert("RGBA")
-    badge_width = badge_img.width
+    badge_width, badge_height = badge_img.size
     max_width = badge_width * 0.9
-
-    qr_size = (280, 280)
-    qr_img = qr_img.resize(qr_size, Image.Resampling.BICUBIC)
-    qr_position = (
-        badge_img.width // 2 - qr_size[0] // 2,
-        1080,
-    )
-    badge_img.paste(qr_img, qr_position, qr_img)
-
     draw = ImageDraw.Draw(badge_img)
-    try:
-        font_path = os.path.join(settings.BASE_DIR, "static/fonts/arialbd.ttf")
-        if not os.path.exists(font_path):
-            font = ImageFont.load_default()
-        else:
-            font = ImageFont.truetype(font_path, size=60)
-    except Exception:
-        font = ImageFont.load_default()
 
+    # === Chargement de la police ===
+    font_path = os.path.join(settings.BASE_DIR, "static/fonts/arialbd.ttf")
+    if not os.path.exists(font_path):
+        font_path = os.path.join(settings.BASE_DIR, "static/fonts/Lato-Bold.ttf")
+
+    # === QR Code positionné en bas ===
+    qr_size = (700, 700)
+    scale_factor = 1.5
+    qr_size_scaled = (int(qr_size[0] * scale_factor), int(qr_size[1] * scale_factor))
+    qr_img = qr_img.resize(qr_size_scaled, Image.Resampling.BICUBIC)
+    qr_x = badge_width // 2 - qr_size[0] // 2
+    qr_y = 3350  # position ajustée selon le design final
+    badge_img.paste(qr_img, (qr_x, qr_y))
+
+    # === Nom Complet ===
     full_name = f"{registration.name.upper()} {registration.first_name}"
-    text_bbox = draw.textbbox((0, 0), full_name, font=font)
-    text_width = text_bbox[2] - text_bbox[0]
-
-    name_font_size = 60
-    while text_width > max_width and name_font_size > 10:
-        name_font_size -= 5
+    name_font_size = 250
+    while True:
         try:
-            font = ImageFont.truetype(font_path, size=name_font_size)
-        except Exception:
-            font = ImageFont.load_default()
-        text_bbox = draw.textbbox((0, 0), full_name, font=font)
-        text_width = text_bbox[2] - text_bbox[0]
+            font_name = ImageFont.truetype(font_path, size=name_font_size)
+        except:
+            font_name = ImageFont.load_default()
+        name_bbox = draw.textbbox((0, 0), full_name, font=font_name)
+        name_width = name_bbox[2] - name_bbox[0]
+        if name_width <= max_width or name_font_size <= 100:
+            break
+        name_font_size -= 5
 
-    text_position = (
-        badge_img.width // 2 - text_width // 2,
-        850,
-    )
-    draw.text(text_position, full_name, fill="white", font=font)
+    name_x = badge_width // 2 - name_width // 2
+    name_y = 2850
+    draw.text((name_x, name_y), full_name, fill="white", font=font_name)
 
-    statut_font_size = 140
-    try:
-        font_statut = ImageFont.truetype(font_path, size=statut_font_size)
-    except Exception:
-        font_statut = ImageFont.load_default()
-
-    try:
-        font_societe = ImageFont.truetype(font_path, size=40)
-    except Exception:
-        font_societe = ImageFont.load_default()
-
-    statut_part1 = registration.id_type.name_fr
+    # === Statut 1 (ex: ENTREPRISE) ===
+    statut_part1 = registration.id_type.name_fr.upper()
+    statut_font_size = 280
     letter_spacing = 30
     letters = list(statut_part1)
-    total_width = 0
-    letter_positions = []
-
-    for letter in letters:
-        bbox = draw.textbbox((0, 0), letter, font=font_statut)
-        letter_width = bbox[2] - bbox[0]
-        letter_positions.append((letter, total_width))
-        total_width += letter_width + letter_spacing
-
-    while total_width > max_width and statut_font_size > 20:
-        statut_font_size -= 10
+    while True:
         try:
             font_statut = ImageFont.truetype(font_path, size=statut_font_size)
-        except Exception:
+        except:
             font_statut = ImageFont.load_default()
         total_width = 0
         letter_positions = []
@@ -109,47 +93,41 @@ def create_badge(registration, request, badge_path):
             letter_width = bbox[2] - bbox[0]
             letter_positions.append((letter, total_width))
             total_width += letter_width + letter_spacing
+        if total_width <= max_width or statut_font_size <= 150:
+            break
+        statut_font_size -= 5
 
-    while total_width > max_width and letter_spacing > 5:
-        letter_spacing -= 5
-        total_width = 0
-        letter_positions = []
-        for letter in letters:
-            bbox = draw.textbbox((0, 0), letter, font=font_statut)
-            letter_width = bbox[2] - bbox[0]
-            letter_positions.append((letter, total_width))
-            total_width += letter_width + letter_spacing
-
-    start_x = badge_img.width // 2 - total_width // 2
+    start_x = badge_width // 2 - total_width // 2
+    y_statut1 = 4500
     for letter, offset in letter_positions:
-        draw.text((start_x + offset, 1450), letter, fill="white", font=font_statut)
+        draw.text((start_x + offset, y_statut1), letter, fill="white", font=font_statut)
 
-    societe_font_size = 40
-    statut_part2 = (
-        registration.name_organization
-        if registration.name_organization
-        else "Universite"
-    )
-    statut_bbox2 = draw.textbbox((0, 0), statut_part2, font=font_societe)
-    statut_width2 = statut_bbox2[2] - statut_bbox2[0]
-
-    while statut_width2 > max_width and societe_font_size > 10:
-        societe_font_size -= 5
+    # === Statut 2 (ex: Université) ===
+    statut_part2 = registration.name_organization or "Université"
+    societe_font_size = 100
+    while True:
         try:
             font_societe = ImageFont.truetype(font_path, size=societe_font_size)
-        except Exception:
+        except:
             font_societe = ImageFont.load_default()
         statut_bbox2 = draw.textbbox((0, 0), statut_part2, font=font_societe)
         statut_width2 = statut_bbox2[2] - statut_bbox2[0]
+        if statut_width2 <= max_width or societe_font_size <= 60:
+            break
+        societe_font_size -= 5
 
-    statut_position2 = (
-        badge_img.width // 2 - statut_width2 // 2,
-        1650,
-    )
-    draw.text(statut_position2, statut_part2, fill="white", font=font_societe)
+    statut_x = badge_width // 2 - statut_width2 // 2
+    statut_y = 4900
+    draw.text((statut_x, statut_y), statut_part2, fill="white", font=font_societe)
 
+    # === Agrandir tout le badge ===
+    new_width = int(badge_img.width * scale_factor)
+    new_height = int(badge_img.height * scale_factor)
+    badge_img = badge_img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+
+    # === Sauvegarde dans un buffer mémoire ===
     buffer = BytesIO()
-    badge_img.save(buffer, format="PNG", quality=100, dpi=(300, 300))
+    badge_img.save(buffer, format="PNG", dpi=(300, 300))
     return buffer.getvalue()
 
 
@@ -252,7 +230,57 @@ class ScanSummaryView(views.APIView):
         )
 
 
+class RegistrationValidateView(views.APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        registration_numbers = request.data.get("registration_numbers", [])
+        if not registration_numbers:
+            return Response(
+                {"error": "Aucun numéro d'inscription valide fourni."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        validated = []
+        errors = []
+        for reg_number in registration_numbers:
+            try:
+                registration = RegistrationVisitors.objects.get(
+                    registration_number=reg_number
+                )
+                result = validate_registration(registration, request)
+                if result["success"]:
+                    validated.append(
+                        {
+                            "registration_number": reg_number,
+                            "badge_url": result["badge_url"],
+                            "email_sent": result["email_sent"],
+                        }
+                    )
+                else:
+                    errors.append(
+                        {"registration_number": reg_number, "error": result["error"]}
+                    )
+            except RegistrationVisitors.DoesNotExist:
+                errors.append(
+                    {
+                        "registration_number": reg_number,
+                        "error": "Inscription non trouvée.",
+                    }
+                )
+
+        response_data = {
+            "message": f"{len(validated)} inscription(s) validée(s) avec succès.",
+            "validated": validated,
+            "errors": errors,
+        }
+        status_code = status.HTTP_200_OK if validated else status.HTTP_400_BAD_REQUEST
+        return Response(response_data, status=status_code)
+
+
 def home(request):
+    for reg in Event.objects.all():
+        print(f"ID: {reg.id_event}, Nom: '{reg.title_fr}'")
     return render(
         request,
         "home.html",
