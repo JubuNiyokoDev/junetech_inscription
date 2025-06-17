@@ -1,5 +1,6 @@
 from django.urls import path
-from . import views
+from . import views, utils
+
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -23,7 +24,7 @@ urlpatterns = [
     path("api/scan-summary/", views.ScanSummaryView.as_view(), name="scan-summary"),
     path(
         "api/registrations/<str:registration_number>/badge/",
-        views.generate_badge,
+        utils.generate_badge,
         name="generate-badge",
     ),
     path(
