@@ -9,7 +9,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 # Quick-start development settings - unsuitable for production
 SECRET_KEY = "django-insecure-8k*6hip(4g3t5e7*h70z1k!#ph0)y!^_z_+&ofb=z0_t)r6!uw"
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True") == "True"
+
 ALLOWED_HOSTS = ["*"]
 CSRF_TRUSTED_ORIGINS = []
 CORS_ALLOWED_ORIGINS = []
@@ -55,25 +56,26 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "junetech_inscription.wsgi.application"
-
-# Database
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.mysql",
-#         "NAME": "registration_junetech",
-#         "USER": "your_mysql_user",
-#         "PASSWORD": "your_mysql_password",
-#         "HOST": "localhost",
-#         "PORT": "3306",
-#     }
-# }
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if DEBUG:
+    # Base de données locale (développement)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    # Base de données PostgreSQL (production)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("POSTGRES_DB", "junetechinscriptiondb"),
+            "USER": os.getenv("POSTGRES_USER", "junetechinscriptionuser"),
+            "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+            "HOST": os.getenv("POSTGRES_HOST", ""),
+            "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        }
+    }
 
 
 # Password validation
